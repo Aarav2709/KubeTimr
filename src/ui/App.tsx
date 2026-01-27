@@ -886,7 +886,6 @@ function AppContent() {
       onSelectSolve={setSelectedSolveId}
       onPenaltyChange={updateSolvePenalty}
       onDelete={handleDeleteSolve}
-      onReplay={setReplaySolve}
       disabled={timerActive}
     />
   );

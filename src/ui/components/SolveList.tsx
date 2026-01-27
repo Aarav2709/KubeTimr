@@ -13,7 +13,6 @@ export interface SolveListProps {
   onSelectSolve?: (solveId: SolveId) => void;
   onPenaltyChange: (solveId: SolveId, penalty: Penalty) => void;
   onDelete: (solveId: SolveId) => void;
-  onReplay?: (solve: Solve) => void;
   disabled?: boolean;
 }
 
@@ -265,7 +264,6 @@ interface SolveRowProps {
   onSelect: (id: SolveId) => void;
   onPenaltyChange: (solveId: SolveId, penalty: Penalty) => void;
   onDelete: (solveId: SolveId) => void;
-  onReplay?: (solve: Solve) => void;
   disabled?: boolean;
 }
 
@@ -276,7 +274,6 @@ function SolveRow({
   onSelect,
   onPenaltyChange,
   onDelete,
-  onReplay,
   disabled = false,
 }: SolveRowProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -324,15 +321,6 @@ function SolveRow({
       }
     },
     [solve.id, onDelete, confirmDelete, disabled],
-  );
-
-  const handleReplayClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (disabled || !onReplay) return;
-      onReplay(solve);
-    },
-    [solve, onReplay, disabled],
   );
 
   const showActions = isHovered || isSelected;
@@ -453,7 +441,6 @@ export function SolveList({
   onSelectSolve,
   onPenaltyChange,
   onDelete,
-  onReplay,
   disabled = false,
 }: SolveListProps) {
   const [selectedId, setSelectedId] = useState<SolveId | null>(
@@ -635,7 +622,6 @@ export function SolveList({
               onSelect={handleSelect}
               onPenaltyChange={onPenaltyChange}
               onDelete={onDelete}
-              onReplay={onReplay}
               disabled={disabled}
             />
           ))
