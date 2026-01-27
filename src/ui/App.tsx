@@ -290,6 +290,141 @@ const styles = {
     pointerEvents: "none",
     transition: "opacity 200ms ease-out",
   } as React.CSSProperties,
+
+  portraitOverlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "var(--color-void)",
+    zIndex: 1000,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "24px",
+    padding: "32px",
+    textAlign: "center",
+  } as React.CSSProperties,
+
+  rotateIcon: {
+    width: "64px",
+    height: "64px",
+    color: "var(--color-text-muted)",
+    animation: "rotate-hint 2s ease-in-out infinite",
+  } as React.CSSProperties,
+
+  portraitTitle: {
+    fontSize: "18px",
+    fontWeight: 600,
+    color: "var(--color-text-primary)",
+    letterSpacing: "-0.01em",
+  } as React.CSSProperties,
+
+  portraitText: {
+    fontSize: "14px",
+    color: "var(--color-text-secondary)",
+    lineHeight: 1.5,
+    maxWidth: "280px",
+  } as React.CSSProperties,
+
+  mobileLandscapeApp: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    backgroundColor: "#000000",
+    color: "var(--color-text-primary)",
+    fontFamily: "var(--font-ui)",
+  } as React.CSSProperties,
+
+  mobileLandscapeMain: {
+    display: "flex",
+    flex: 1,
+    minHeight: 0,
+    position: "relative",
+  } as React.CSSProperties,
+
+  mobileLandscapeTimer: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 0,
+    position: "relative",
+  } as React.CSSProperties,
+
+  mobileLandscapeSidebar: {
+    width: "180px",
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "var(--color-surface)",
+    borderLeftWidth: "1px",
+    borderLeftStyle: "solid",
+    borderLeftColor: "var(--color-border-subtle)",
+    overflowY: "auto",
+  } as React.CSSProperties,
+
+  mobileLandscapeScramble: {
+    padding: "8px 12px",
+    paddingLeft: "max(12px, env(safe-area-inset-left))",
+    backgroundColor: "var(--color-surface)",
+    borderBottomWidth: "1px",
+    borderBottomStyle: "solid",
+    borderBottomColor: "var(--color-border-subtle)",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  } as React.CSSProperties,
+
+  mobileLandscapeScrambleText: {
+    flex: 1,
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    color: "var(--color-text-primary)",
+    letterSpacing: "0.02em",
+    lineHeight: 1.4,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  } as React.CSSProperties,
+
+  mobileLandscapeRefreshBtn: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "28px",
+    height: "28px",
+    flexShrink: 0,
+    color: "var(--color-text-muted)",
+    backgroundColor: "var(--color-surface-raised)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "var(--color-border)",
+    borderRadius: "4px",
+    cursor: "pointer",
+  } as React.CSSProperties,
+
+  miniStatRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "4px 10px",
+    fontSize: "10px",
+  } as React.CSSProperties,
+
+  miniStatLabel: {
+    color: "var(--color-text-muted)",
+    fontWeight: 500,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  } as React.CSSProperties,
+
+  miniStatValue: {
+    fontFamily: "var(--font-mono)",
+    color: "var(--color-text-primary)",
+    fontWeight: 600,
+  } as React.CSSProperties,
 };
 
 const PUZZLE_LABELS: Record<string, string> = {
@@ -353,13 +488,38 @@ function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
+    const check = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isTouchDevice && isSmallScreen);
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
   return isMobile;
+}
+
+function useOrientation(): 'portrait' | 'landscape' {
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
+    window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+  );
+
+  useEffect(() => {
+    const check = () => {
+      setOrientation(window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+    };
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return () => {
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
+    };
+  }, []);
+
+  return orientation;
 }
 
 function AppContent() {
@@ -401,6 +561,9 @@ function AppContent() {
   );
 
   const isMobile = useIsMobile();
+  const orientation = useOrientation();
+  const showPortraitWarning = isMobile && orientation === 'portrait';
+  const isMobileLandscape = isMobile && orientation === 'landscape';
 
   const handleSolveComplete = useCallback(
     (result: TimingResult) => {
@@ -773,100 +936,145 @@ function AppContent() {
     </>
   );
 
-  return (
-    <div style={styles.app}>
-      {isMobile && (
-        <div
-          style={{
-            ...styles.mobileHeader,
-            display: "flex",
-          }}
+  // Helper function to format time for mini stats
+  const formatMiniTime = (ms: number | null): string => {
+    if (ms === null) return "—";
+    const totalSeconds = Math.floor(ms / 1000);
+    const centiseconds = Math.floor((ms % 1000) / 10);
+    const seconds = totalSeconds % 60;
+    const minutes = Math.floor(totalSeconds / 60);
+    if (minutes > 0) {
+      return `${minutes}:${seconds.toString().padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
+    }
+    return `${seconds}.${centiseconds.toString().padStart(2, "0")}`;
+  };
+
+  // Portrait warning for mobile
+  if (showPortraitWarning) {
+    return (
+      <div style={styles.portraitOverlay as React.CSSProperties}>
+        <svg
+          style={styles.rotateIcon}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <button
-            style={styles.mobileMenuBtn}
-            onClick={() => setLeftDrawerOpen(true)}
-            aria-label="Open solves"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
+          <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12" y2="18.01" />
+          <path d="M7 22h10" strokeDasharray="2 2" opacity="0.4" />
+          <path d="M2 12h2M20 12h2" opacity="0.4" />
+          <path d="M17 7l2-2M17 17l2 2M5 7l-2-2M5 17l-2 2" opacity="0.3" />
+        </svg>
+        <div style={styles.portraitTitle}>Rotate Your Device</div>
+        <div style={styles.portraitText}>
+          KubeTimr works best in landscape mode. Please rotate your phone for the optimal timing experience.
+        </div>
+      </div>
+    );
+  }
 
-          <img
-            src="/src/public/logo.png"
-            alt="KubeTimr"
-            style={styles.mobileLogo}
-          />
-
+  // Mobile landscape layout
+  if (isMobileLandscape) {
+    return (
+      <div style={styles.mobileLandscapeApp}>
+        {/* Top scramble bar */}
+        <div style={styles.mobileLandscapeScramble as React.CSSProperties}>
+          <div style={styles.mobileLandscapeScrambleText as React.CSSProperties}>
+            {state.scrambleLoading ? "Generating..." : (state.currentScramble?.notation || "No scramble")}
+          </div>
           <button
-            style={styles.mobileMenuBtn}
-            onClick={() => setRightDrawerOpen(true)}
-            aria-label="Open settings"
+            style={styles.mobileLandscapeRefreshBtn as React.CSSProperties}
+            onClick={refreshScramble}
+            disabled={timerActive || state.scrambleLoading}
+            aria-label="New scramble"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6" />
+              <path d="M1 20v-6h6" />
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
             </svg>
           </button>
         </div>
-      )}
 
-      {isMobile && (
-        <>
-          <div
-            style={{
-              ...styles.drawerBackdrop,
-              opacity: leftDrawerOpen || rightDrawerOpen ? 1 : 0,
-              pointerEvents:
-                leftDrawerOpen || rightDrawerOpen ? "auto" : "none",
-            }}
-            onClick={() => {
-              setLeftDrawerOpen(false);
-              setRightDrawerOpen(false);
-            }}
-          />
-
-          <div
-            style={{
-              ...styles.drawer,
-              left: 0,
-              transform: leftDrawerOpen ? "translateX(0)" : "translateX(-100%)",
-            }}
-          >
-            {leftPanelContent}
+        {/* Main content area */}
+        <div style={styles.mobileLandscapeMain as React.CSSProperties}>
+          {/* Timer zone */}
+          <div style={styles.mobileLandscapeTimer as React.CSSProperties}>
+            <TimerDisplay
+              status={timer.status}
+              displayTime={timer.displayTime}
+              inspectionRemaining={timer.inspectionRemaining}
+              penalty={timer.result?.penalty ?? Penalty.None}
+              isHolding={timer.isHolding}
+              isReady={timer.isReady}
+              isPB={timer.status === "stopped" && isLatestPB}
+            />
           </div>
 
-          <div
-            style={{
-              ...styles.drawer,
-              right: 0,
-              left: "auto",
-              transform: rightDrawerOpen ? "translateX(0)" : "translateX(100%)",
-            }}
-          >
-            {rightPanelContent}
-          </div>
-        </>
-      )}
+          {/* Mini sidebar with stats */}
+          {!timerActive && (
+            <div style={styles.mobileLandscapeSidebar as React.CSSProperties}>
+              <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                <div style={{ fontSize: "9px", fontWeight: 600, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  Stats · {activeSolves.length} solves
+                </div>
+              </div>
+              {stats && (
+                <>
+                  <div style={styles.miniStatRow as React.CSSProperties}>
+                    <span style={styles.miniStatLabel as React.CSSProperties}>Best</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.best)}</span>
+                  </div>
+                  <div style={styles.miniStatRow as React.CSSProperties}>
+                    <span style={styles.miniStatLabel as React.CSSProperties}>Ao5</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.ao5)}</span>
+                  </div>
+                  <div style={styles.miniStatRow as React.CSSProperties}>
+                    <span style={styles.miniStatLabel as React.CSSProperties}>Ao12</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.ao12)}</span>
+                  </div>
+                  <div style={styles.miniStatRow as React.CSSProperties}>
+                    <span style={styles.miniStatLabel as React.CSSProperties}>Mean</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.mean)}</span>
+                  </div>
+                </>
+              )}
+              {!stats && (
+                <div style={{ padding: "12px 10px", fontSize: "10px", color: "var(--color-text-muted)", textAlign: "center" }}>
+                  No solves yet
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
+        {/* Modals */}
+        {showSplitEditor && (
+          <div
+            style={styles.modalBackdrop as React.CSSProperties}
+            onClick={() => setShowSplitEditor(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Split phase editor"
+          >
+            <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <SplitEditor
+                phases={state.settings.splitPhases}
+                onChange={setSplitPhases}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop layout
+  return (
+    <div style={styles.app}>
       {!isMobile && (
         <div
           style={{

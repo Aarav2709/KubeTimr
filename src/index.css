@@ -1,17 +1,17 @@
 :root {
     --color-void: #000000;
-    --color-surface: #080809;
-    --color-surface-raised: #101113;
-    --color-border: #1a1c1f;
-    --color-border-subtle: #131416;
+    --color-surface: #060607;
+    --color-surface-raised: #0d0e10;
+    --color-border: #18191c;
+    --color-border-subtle: #111213;
 
-    --color-text-primary: #e8eaed;
-    --color-text-secondary: #9aa0a9;
-    --color-text-muted: #6b7280;
-    --color-text-disabled: #404550;
+    --color-text-primary: #f0f2f5;
+    --color-text-secondary: #8b919a;
+    --color-text-muted: #5c6370;
+    --color-text-disabled: #363940;
 
-    --color-ready: #4ade80;
-    --color-ready-muted: #22c55e;
+    --color-ready: #34d399;
+    --color-ready-muted: #10b981;
     --color-warn: #fbbf24;
     --color-warn-muted: #d97706;
     --color-error: #f87171;
@@ -34,17 +34,17 @@
     --font-ui:
         "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-    --timer-font-size: clamp(4rem, 18vw, 10rem);
-    --timer-font-weight: 600;
-    --timer-letter-spacing: -0.04em;
+    --timer-font-size: clamp(4rem, 18vw, 9rem);
+    --timer-font-weight: 500;
+    --timer-letter-spacing: -0.03em;
     --timer-line-height: 1;
-    --timer-decimal-scale: 0.72;
-    --timer-decimal-opacity: 0.7;
+    --timer-decimal-scale: 0.68;
+    --timer-decimal-opacity: 0.55;
 
-    --scramble-font-size: clamp(0.75rem, 1.4vw, 0.95rem);
-    --scramble-font-weight: 500;
-    --scramble-letter-spacing: 0.02em;
-    --scramble-line-height: 1.5;
+    --scramble-font-size: clamp(0.75rem, 1.3vw, 0.9rem);
+    --scramble-font-weight: 450;
+    --scramble-letter-spacing: 0.025em;
+    --scramble-line-height: 1.55;
 
     --text-xs: 0.6875rem;
     --text-sm: 0.75rem;
@@ -807,4 +807,31 @@ select {
         height: 100vh;
         height: -webkit-fill-available;
     }
+}
+
+/* Portrait rotation hint animation */
+@keyframes rotate-hint {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-15deg);
+    }
+    75% {
+        transform: rotate(90deg);
+    }
+}
+
+/* Mobile landscape specific styles */
+@media (max-width: 932px) and (orientation: landscape) and (hover: none) {
+    :root {
+        --timer-font-size: clamp(3rem, 15vh, 5rem);
+        --scramble-font-size: 11px;
+    }
+}
+
+/* Improved minimalist styles */
+.minimalist-timer {
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: "tnum" 1, "zero" 1;
 }

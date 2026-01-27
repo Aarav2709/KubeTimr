@@ -49,16 +49,16 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "4px",
+    gap: "6px",
     width: "100%",
-    maxWidth: "640px",
+    maxWidth: "600px",
   } as React.CSSProperties,
 
   topRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "8px",
+    gap: "10px",
   } as React.CSSProperties,
 
   dropdownContainer: {
@@ -70,7 +70,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    padding: "3px 10px",
+    padding: "4px 12px",
     fontSize: "11px",
     fontFamily: "var(--font-ui)",
     fontWeight: 500,
@@ -79,10 +79,10 @@ const styles = {
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "var(--color-border)",
-    borderRadius: "4px",
+    borderRadius: "5px",
     cursor: "pointer",
     outline: "none",
-    transition: "all 40ms ease-out",
+    transition: "all 60ms ease-out",
     minWidth: "80px",
     userSelect: "none",
   } as React.CSSProperties,
@@ -161,8 +161,8 @@ const styles = {
   scrambleContainer: {
     width: "100%",
     textAlign: "center",
-    padding: "0 8px",
-    minHeight: "42px",
+    padding: "0 12px",
+    minHeight: "40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -173,32 +173,34 @@ const styles = {
     fontSize: "var(--scramble-font-size)",
     fontWeight: "var(--scramble-font-weight)",
     color: "var(--color-text-primary)",
-    lineHeight: 1.5,
+    lineHeight: "var(--scramble-line-height)",
     letterSpacing: "var(--scramble-letter-spacing)",
     wordBreak: "break-word",
     hyphens: "none",
-    maxWidth: "540px",
+    maxWidth: "520px",
     margin: "0 auto",
+    opacity: 0.95,
   } as React.CSSProperties,
 
   scrambleTextMultiLine: {
     whiteSpace: "pre-wrap",
     fontSize: "var(--text-sm)",
-    lineHeight: 1.6,
+    lineHeight: 1.65,
   } as React.CSSProperties,
 
   scrambleLoading: {
     color: "var(--color-text-muted)",
     fontSize: "var(--text-sm)",
     fontFamily: "var(--font-ui)",
-    fontWeight: 500,
+    fontWeight: 450,
+    letterSpacing: "0.01em",
   } as React.CSSProperties,
 
   refreshButton: {
     display: "flex",
     alignItems: "center",
-    gap: "4px",
-    padding: "2px 8px",
+    gap: "5px",
+    padding: "3px 10px",
     fontSize: "10px",
     fontFamily: "var(--font-ui)",
     fontWeight: 500,
@@ -207,10 +209,10 @@ const styles = {
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "transparent",
-    borderRadius: "3px",
+    borderRadius: "4px",
     cursor: "pointer",
-    transition: "all 40ms ease-out",
-    marginTop: "2px",
+    transition: "all 60ms ease-out",
+    marginTop: "4px",
   } as React.CSSProperties,
 
   refreshButtonHover: {
@@ -220,7 +222,7 @@ const styles = {
   } as React.CSSProperties,
 
   refreshButtonDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
     cursor: "not-allowed",
   } as React.CSSProperties,
 
@@ -228,8 +230,8 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: "12px",
-    padding: "0 3px",
+    minWidth: "14px",
+    padding: "1px 4px",
     fontFamily: "var(--font-mono)",
     fontSize: "8px",
     fontWeight: 500,
@@ -239,7 +241,7 @@ const styles = {
     borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "var(--color-border)",
-    borderRadius: "2px",
+    borderRadius: "3px",
   } as React.CSSProperties,
 };
 

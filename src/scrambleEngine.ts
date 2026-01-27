@@ -106,6 +106,7 @@ export function generateScramble(request: ScrambleRequest): Scramble {
 
 export async function generateScrambleAsync(
   puzzleId: PuzzleId,
+  forceNew: boolean = true,
 ): Promise<Scramble> {
   const wcaEventId = puzzleId as WcaEventId;
 
@@ -113,7 +114,9 @@ export async function generateScrambleAsync(
     return generateScramble({ puzzleId });
   }
 
-  if (currentScramblePromise && lastPuzzleId === puzzleId) {
+  // Always generate a new scramble when forceNew is true (default)
+  // or when the puzzle changed
+  if (!forceNew && currentScramblePromise && lastPuzzleId === puzzleId) {
     return currentScramblePromise;
   }
 
