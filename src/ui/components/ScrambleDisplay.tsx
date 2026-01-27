@@ -6,6 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { PuzzleId, Scramble, WcaEventId } from "../../types";
+import ScrambleVisualizationModal from "./ScrambleVisualizationModal";
 
 export interface ScrambleDisplayProps {
   scramble: Scramble | null;
@@ -14,6 +15,7 @@ export interface ScrambleDisplayProps {
   onRefresh: () => void;
   disabled?: boolean;
   loading?: boolean;
+  showImage?: boolean;
 }
 
 const PUZZLE_LABELS: Record<WcaEventId, string> = {
@@ -69,6 +71,7 @@ const styles = {
   dropdownTrigger: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: "6px",
     padding: "4px 12px",
     fontSize: "11px",
@@ -83,8 +86,9 @@ const styles = {
     cursor: "pointer",
     outline: "none",
     transition: "all 60ms ease-out",
-    minWidth: "80px",
+    minWidth: "90px",
     userSelect: "none",
+    textAlign: "center",
   } as React.CSSProperties,
 
   dropdownTriggerHover: {
@@ -132,6 +136,7 @@ const styles = {
   dropdownItem: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     padding: "5px 10px",
     fontSize: "11px",
     fontFamily: "var(--font-ui)",
@@ -140,6 +145,7 @@ const styles = {
     cursor: "pointer",
     transition: "all 40ms ease-out",
     outline: "none",
+    textAlign: "center",
   } as React.CSSProperties,
 
   dropdownItemHover: {
@@ -195,98 +201,11 @@ const styles = {
     fontWeight: 450,
     letterSpacing: "0.01em",
   } as React.CSSProperties,
-
-  refreshButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    padding: "3px 10px",
-    fontSize: "10px",
-    fontFamily: "var(--font-ui)",
-    fontWeight: 500,
-    color: "var(--color-text-muted)",
-    backgroundColor: "transparent",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "transparent",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "all 60ms ease-out",
-    marginTop: "4px",
-  } as React.CSSProperties,
-
-  refreshButtonHover: {
-    color: "var(--color-text-secondary)",
-    backgroundColor: "var(--color-surface-raised)",
-    borderColor: "var(--color-border)",
-  } as React.CSSProperties,
-
-  refreshButtonDisabled: {
-    opacity: 0.35,
-    cursor: "not-allowed",
-  } as React.CSSProperties,
-
-  kbd: {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: "14px",
-    padding: "1px 4px",
-    fontFamily: "var(--font-mono)",
-    fontSize: "8px",
-    fontWeight: 500,
-    lineHeight: 1.3,
-    color: "var(--color-text-muted)",
-    backgroundColor: "var(--color-surface)",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "var(--color-border)",
-    borderRadius: "3px",
-  } as React.CSSProperties,
 };
 
-function formatScrambleLines(notation: string): string[] {
-  const normalized = notation.replace(/\s+/g, " ").trim();
-  if (!normalized) return [""];
-  if (normalized.includes("\n")) {
-    return normalized
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .slice(0, 2);
-  }
-
-  const tokens = normalized.split(" ");
-  if (tokens.length <= 4) return [normalized];
-
-  const totalLen = tokens.reduce((sum, token) => sum + token.length + 1, -1);
-  const target = totalLen / 2;
-
-  const line1: string[] = [];
-  const line2: string[] = [];
-  let line1Len = 0;
-
-  tokens.forEach((token, index) => {
-    const projected = line1Len + (line1.length ? 1 : 0) + token.length;
-    const remainingTokens = tokens.length - index - 1;
-    const shouldStartLine2 =
-      (line2.length === 0 && projected > target && remainingTokens >= 1) ||
-      (line2.length === 0 && remainingTokens === 0 && line1.length > 2);
-
-    if (shouldStartLine2) {
-      line2.push(token);
-    } else {
-      line1.push(token);
-      line1Len = projected;
-    }
-  });
-
-  if (line2.length === 1 && line1.length > 2) {
-    const moved = line1.pop();
-    if (moved) line2.unshift(moved);
-  }
-
-  return [line1.join(" "), line2.join(" ")].filter(Boolean).slice(0, 2);
+function formatScramble(notation: string): string {
+  // Normalize whitespace and return as single line
+  return notation.replace(/\s+/g, " ").trim();
 }
 
 export function ScrambleDisplay({
@@ -296,13 +215,14 @@ export function ScrambleDisplay({
   onRefresh,
   disabled = false,
   loading = false,
+  showImage = true,
 }: ScrambleDisplayProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isRefreshHovered, setIsRefreshHovered] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [hoveredIndex, setHoveredIndex] = useState(-1);
   const [filterQuery, setFilterQuery] = useState("");
+  const [showVisualizationModal, setShowVisualizationModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -311,6 +231,21 @@ export function ScrambleDisplay({
     const query = filterQuery.toLowerCase();
     return PUZZLE_ORDER.filter((id) => id.toLowerCase().includes(query));
   }, [filterQuery]);
+
+  // Close visualization modal on Escape
+  useEffect(() => {
+    if (!showVisualizationModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.code === "Escape") {
+        e.preventDefault();
+        setShowVisualizationModal(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [showVisualizationModal]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -470,12 +405,11 @@ export function ScrambleDisplay({
     Math.max(filteredPuzzles.length - 1, 0),
   );
 
-  const scrambleLines = useMemo(
-    () => (scramble?.notation ? formatScrambleLines(scramble.notation) : []),
+  const scrambleText = useMemo(
+    () => (scramble?.notation ? formatScramble(scramble.notation) : ""),
     [scramble],
   );
-  const isMultiLine = scrambleLines.length > 1;
-  const hasScramble = scramble?.notation && scramble.notation.length > 0;
+  const hasScramble = scrambleText.length > 0;
 
   return (
     <div style={styles.container}>
@@ -572,48 +506,68 @@ export function ScrambleDisplay({
             </div>
           )}
         </div>
+
+        {/* Toggle 3D visualization modal - for all cubes */}
+        {showImage && hasScramble && !loading && ["222", "333", "444", "555", "666", "777"].includes(activePuzzleId) && (
+          <button
+            type="button"
+            onClick={() => setShowVisualizationModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px 8px",
+              fontSize: "10px",
+              fontWeight: 500,
+              color: "var(--color-text-muted)",
+              backgroundColor: "var(--color-surface-raised)",
+              border: "1px solid",
+              borderColor: "var(--color-border)",
+              borderRadius: "5px",
+              cursor: disabled ? "not-allowed" : "pointer",
+              transition: "all 60ms ease-out",
+              opacity: disabled ? 0.5 : 1,
+            }}
+            disabled={disabled}
+            aria-label="Show 3D scramble visualization"
+            title="Show 3D cube view"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l9 5v8l-9 5-9-5V8l9-5z" />
+              <path d="M12 8v13" />
+              <path d="M3 8l9 5 9-5" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {/* 3D Visualization Modal with Animation */}
+      {showVisualizationModal && hasScramble && ["222", "333", "444", "555", "666", "777"].includes(activePuzzleId) && (
+        <ScrambleVisualizationModal
+          scramble={scrambleText}
+          puzzleId={activePuzzleId as WcaEventId}
+          puzzleLabel={PUZZLE_LABELS[activePuzzleId as WcaEventId] || "Cube"}
+          onClose={() => setShowVisualizationModal(false)}
+        />
+      )}
 
       <div style={styles.scrambleContainer as React.CSSProperties}>
         {loading ? (
           <div style={styles.scrambleLoading}>Generating scramble...</div>
         ) : hasScramble ? (
           <div
-            style={{
-              ...styles.scrambleText,
-              ...(isMultiLine ? styles.scrambleTextMultiLine : {}),
-            }}
+            style={styles.scrambleText}
             role="region"
             aria-label="Scramble sequence"
             aria-live="polite"
           >
-            {scrambleLines.map((line, idx) => (
-              <div key={idx}>{line}</div>
-            ))}
+            {scrambleText}
           </div>
         ) : (
           <div style={styles.scrambleLoading}>No scramble</div>
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={onRefresh}
-        onMouseEnter={() => setIsRefreshHovered(true)}
-        onMouseLeave={() => setIsRefreshHovered(false)}
-        disabled={disabled || loading}
-        style={{
-          ...styles.refreshButton,
-          ...(isRefreshHovered && !disabled && !loading
-            ? styles.refreshButtonHover
-            : {}),
-          ...(disabled || loading ? styles.refreshButtonDisabled : {}),
-        }}
-        aria-label="Generate new scramble"
-      >
-        <span>New scramble</span>
-        <span style={styles.kbd}>R</span>
-      </button>
     </div>
   );
 }

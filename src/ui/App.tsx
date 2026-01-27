@@ -15,9 +15,11 @@ import SplitMarkers from "./components/SplitMarkers";
 import SplitBreakdown from "./components/SplitBreakdown";
 import SplitEditor from "./components/SplitEditor";
 import Settings from "./components/Settings";
+import VirtualReplay from "./components/VirtualReplay";
 import {
   Penalty,
   PuzzleId,
+  Solve,
   SplitCapture,
   SplitInstance,
   SolveId,
@@ -549,6 +551,7 @@ function AppContent() {
   const [importNotice, setImportNotice] = useState<string | null>(null);
   const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
   const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
+  const [replaySolve, setReplaySolve] = useState<Solve | null>(null);
 
   const fullscreenHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -883,6 +886,7 @@ function AppContent() {
       onSelectSolve={setSelectedSolveId}
       onPenaltyChange={updateSolvePenalty}
       onDelete={handleDeleteSolve}
+      onReplay={setReplaySolve}
       disabled={timerActive}
     />
   );
@@ -1026,19 +1030,19 @@ function AppContent() {
                 <>
                   <div style={styles.miniStatRow as React.CSSProperties}>
                     <span style={styles.miniStatLabel as React.CSSProperties}>Best</span>
-                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.best)}</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.rolling.bestMs)}</span>
                   </div>
                   <div style={styles.miniStatRow as React.CSSProperties}>
                     <span style={styles.miniStatLabel as React.CSSProperties}>Ao5</span>
-                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.ao5)}</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.rolling.ao5?.valueMs ?? null)}</span>
                   </div>
                   <div style={styles.miniStatRow as React.CSSProperties}>
                     <span style={styles.miniStatLabel as React.CSSProperties}>Ao12</span>
-                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.ao12)}</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.rolling.ao12?.valueMs ?? null)}</span>
                   </div>
                   <div style={styles.miniStatRow as React.CSSProperties}>
                     <span style={styles.miniStatLabel as React.CSSProperties}>Mean</span>
-                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.mean)}</span>
+                    <span style={styles.miniStatValue as React.CSSProperties}>{formatMiniTime(stats.rolling.meanMs)}</span>
                   </div>
                 </>
               )}
@@ -1190,6 +1194,13 @@ function AppContent() {
             />
           </div>
         </div>
+      )}
+
+      {replaySolve && (
+        <VirtualReplay
+          solve={replaySolve}
+          onClose={() => setReplaySolve(null)}
+        />
       )}
     </div>
   );
