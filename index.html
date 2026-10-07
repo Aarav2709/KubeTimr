@@ -1,166 +1,19 @@
 <!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-        />
-        <meta
-            name="description"
-            content="KubeTimr — A keyboard-first, offline-first cube timer for serious speedcubers. Cleaner than CSTimer, focused on precision and flow."
-        />
-        <meta name="theme-color" content="#000000" />
-        <meta name="color-scheme" content="dark" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
-        />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="format-detection" content="telephone=no" />
-        <link rel="icon" type="image/png" href="/src/public/logo.png" />
-        <link rel="apple-touch-icon" href="/src/public/logo.png" />
-        <title>KubeTimr</title>
-
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap"
-            rel="stylesheet"
-        />
-
-        <style>
-            *,
-            *::before,
-            *::after {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
-
-            html {
-                font-family:
-                    "Inter",
-                    system-ui,
-                    -apple-system,
-                    "Segoe UI",
-                    Roboto,
-                    sans-serif;
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-                text-rendering: optimizeLegibility;
-                -webkit-text-size-adjust: 100%;
-                font-variant-numeric: tabular-nums;
-                font-feature-settings:
-                    "tnum" 1,
-                    "kern" 1;
-            }
-
-            html,
-            body,
-            #root {
-                height: 100dvh;
-                width: 100%;
-                overflow: hidden;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
-
-            @supports not (height: 100dvh) {
-                html,
-                body,
-                #root {
-                    height: 100vh;
-                    height: -webkit-fill-available;
-                }
-            }
-
-            body {
-                background-color: #000000;
-                color: #e8eaed;
-                overscroll-behavior: none;
-                touch-action: manipulation;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            .loading {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                width: 100%;
-                font-size: 0.8125rem;
-                font-weight: 500;
-                color: rgba(255, 255, 255, 0.15);
-                font-family:
-                    "Inter",
-                    system-ui,
-                    -apple-system,
-                    sans-serif;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-            }
-
-            :focus-visible {
-                outline: 2px solid #60a5fa;
-                outline-offset: 2px;
-            }
-
-            :focus:not(:focus-visible) {
-                outline: none;
-            }
-
-            ::selection {
-                background-color: rgba(96, 165, 250, 0.2);
-                color: #e8eaed;
-            }
-
-            ::-webkit-scrollbar {
-                width: 3px;
-                height: 3px;
-            }
-
-            ::-webkit-scrollbar-track {
-                background: transparent;
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: rgba(255, 255, 255, 0.08);
-                border-radius: 2px;
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: rgba(255, 255, 255, 0.12);
-            }
-
-            * {
-                scrollbar-width: thin;
-                scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
-            }
-
-            .no-select {
-                user-select: none;
-                -webkit-user-select: none;
-            }
-
-            :fullscreen {
-                background-color: #000000;
-            }
-
-            :fullscreen #root {
-                height: 100%;
-                width: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="root">
-            <div class="loading">KubeTimr</div>
-        </div>
-        <script type="module" src="/src/main.tsx"></script>
-    </body>
+<html lang="en" data-theme="midnight">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="KubeTimr, a clean speedcubing timer with random state scrambles, stats per cube and csTimer import." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>KubeTimr</title>
+    <style>
+      html, body { margin: 0; background: #000; color: #e8eaed; }
+      .boot { display: grid; place-items: center; height: 100dvh; font: 600 12px system-ui, sans-serif; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.25; }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div class="boot">KubeTimr</div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
