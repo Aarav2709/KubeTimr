@@ -525,7 +525,7 @@ input[type="range"] {
   font-family: var(--font-ui);
   font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.015em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--text);
